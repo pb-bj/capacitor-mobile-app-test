@@ -3,7 +3,7 @@
 import axios from 'axios';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import CameraScanner from './CameraScanner';
+import BarcodeScanner from './BarcodeScanner';
 
 export default function List() {
 	const [posts, setPosts] = useState([]);
@@ -75,10 +75,49 @@ export default function List() {
 			`}</style>
 
 			<h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '24px', color: '#111' }}>Products</h1>
-			<button style={{}} onClick={() => setOpenCamera(true)}>
-				Open Camera
+			<button
+				onClick={() => setOpenCamera(true)}
+				style={{
+					display: 'flex',
+					alignItems: 'center',
+					gap: '8px',
+					padding: '10px 20px',
+					backgroundColor: '#111',
+					color: '#fff',
+					border: 'none',
+					borderRadius: '50px',
+					fontSize: '14px',
+					fontWeight: '600',
+					cursor: 'pointer',
+					marginBottom: '24px',
+				}}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="18"
+					height="18"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+					strokeWidth={2}
+				>
+					<path
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						d="M3 9V6a3 3 0 013-3h3M15 3h3a3 3 0 013 3v3M3 15v3a3 3 0 003 3h3m6 0h3a3 3 0 003-3v-3"
+					/>
+				</svg>
+				Scan QR code
 			</button>
-			{openCamera && <CameraScanner />}
+			{openCamera && (
+				<BarcodeScanner
+					onClose={() => setOpenCamera(false)}
+					onResult={(value) => {
+						console.log('Scanned result:', value);
+						setOpenCamera(false);
+					}}
+				/>
+			)}
 			<div className="product-grid">
 				{posts && posts.length > 0 ? (
 					posts.map((post) => (
