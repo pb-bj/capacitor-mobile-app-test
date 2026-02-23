@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import BarcodeScanner from './BarcodeScanner';
 
@@ -9,6 +10,7 @@ export default function List() {
 	const [posts, setPosts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [openCamera, setOpenCamera] = useState(false);
+	const [search, setSearch] = useState('');
 
 	useEffect(() => {
 		const fetchPosts = async () => {
@@ -24,6 +26,12 @@ export default function List() {
 		};
 		fetchPosts();
 	}, []);
+
+	const filteredPosts = posts.filter(
+		(post) =>
+			post.title.toLowerCase().includes(search.toLowerCase()) ||
+			post.category.toLowerCase().includes(search.toLowerCase()),
+	);
 
 	if (loading) {
 		return (
@@ -72,16 +80,30 @@ export default function List() {
 					transform: translateY(-4px);
 					box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 				}
+				.search-input {
+					width: 100%;
+					padding: 12px 16px 12px 44px;
+					border: 2px solid #e0e0e0;
+					border-radius: 50px;
+					fontSize: 14px;
+					outline: none;
+					transition: border-color 0.2s;
+					backgroundColor: #fff;
+					boxSizing: border-box;
+				}
+				.search-input:focus {
+					border-color: #111;
+				}
 			`}</style>
 
 			<h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '24px', color: '#111' }}>Products</h1>
+
 			<button
-				onClick={() => setOpenCamera(true)}
 				style={{
 					display: 'flex',
 					alignItems: 'center',
 					gap: '8px',
-					padding: '10px 20px',
+					padding: '12px 20px',
 					backgroundColor: '#111',
 					color: '#fff',
 					border: 'none',
@@ -89,38 +111,133 @@ export default function List() {
 					fontSize: '14px',
 					fontWeight: '600',
 					cursor: 'pointer',
-					marginBottom: '24px',
+					whiteSpace: 'nowrap',
+					flexShrink: 0,
 				}}
 			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="18"
-					height="18"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-					strokeWidth={2}
-				>
-					<path
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						d="M3 9V6a3 3 0 013-3h3M15 3h3a3 3 0 013 3v3M3 15v3a3 3 0 003 3h3m6 0h3a3 3 0 003-3v-3"
-					/>
-				</svg>
-				Scan QR code
+				<Link href={'/location'}>map</Link>
 			</button>
+			{/* Top Bar — Search + Scan Button */}
+			<div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '24px' }}>
+				{/* Search Input */}
+				<div style={{ position: 'relative', flex: 1 }}>
+					{/* Search Icon */}
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="18"
+						height="18"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="#aaa"
+						strokeWidth={2}
+						style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}
+					>
+						<path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
+					</svg>
+
+					<input
+						type="text"
+						placeholder="Search products or categories..."
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						className="search-input"
+						style={{
+							width: '100%',
+							padding: '12px 16px 12px 44px',
+							border: '2px solid #e0e0e0',
+							borderRadius: '50px',
+							fontSize: '14px',
+							outline: 'none',
+							backgroundColor: '#fff',
+							boxSizing: 'border-box',
+						}}
+					/>
+
+					{/* Clear Button */}
+					{search.length > 0 && (
+						<button
+							onClick={() => setSearch('')}
+							style={{
+								position: 'absolute',
+								right: '14px',
+								top: '50%',
+								transform: 'translateY(-50%)',
+								background: '#f0f0f0',
+								border: 'none',
+								borderRadius: '50%',
+								width: '22px',
+								height: '22px',
+								cursor: 'pointer',
+								fontSize: '12px',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							✕
+						</button>
+					)}
+				</div>
+
+				{/* Scan Button */}
+				<button
+					onClick={() => setOpenCamera(true)}
+					style={{
+						display: 'flex',
+						alignItems: 'center',
+						gap: '8px',
+						padding: '12px 20px',
+						backgroundColor: '#111',
+						color: '#fff',
+						border: 'none',
+						borderRadius: '50px',
+						fontSize: '14px',
+						fontWeight: '600',
+						cursor: 'pointer',
+						whiteSpace: 'nowrap',
+						flexShrink: 0,
+					}}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="18"
+						height="18"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						strokeWidth={2}
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							d="M3 9V6a3 3 0 013-3h3M15 3h3a3 3 0 013 3v3M3 15v3a3 3 0 003 3h3m6 0h3a3 3 0 003-3v-3"
+						/>
+					</svg>
+					Scan
+				</button>
+			</div>
+
+			{/* Result Count */}
+			{search.length > 0 && (
+				<p style={{ fontSize: '13px', color: '#888', marginBottom: '16px' }}>
+					{filteredPosts.length} result{filteredPosts.length !== 1 ? 's' : ''} for{' '}
+					<strong style={{ color: '#111' }}>"{search}"</strong>
+				</p>
+			)}
+
 			{openCamera && (
 				<BarcodeScanner
 					onClose={() => setOpenCamera(false)}
 					onResult={(value) => {
-						console.log('Scanned result:', value);
+						setSearch(value); // auto search with scanned value
 						setOpenCamera(false);
 					}}
 				/>
 			)}
+
 			<div className="product-grid">
-				{posts && posts.length > 0 ? (
-					posts.map((post) => (
+				{filteredPosts.length > 0 ? (
+					filteredPosts.map((post) => (
 						<div key={post.id} className="product-card">
 							<div
 								style={{
@@ -168,7 +285,17 @@ export default function List() {
 						</div>
 					))
 				) : (
-					<div style={{ color: '#888', fontSize: '16px' }}>No products yet</div>
+					<div
+						style={{
+							gridColumn: '1 / -1',
+							textAlign: 'center',
+							padding: '48px 0',
+							color: '#888',
+						}}
+					>
+						<p style={{ fontSize: '16px', marginBottom: '8px' }}>No products found</p>
+						<p style={{ fontSize: '13px' }}>Try a different search term</p>
+					</div>
 				)}
 			</div>
 		</div>
