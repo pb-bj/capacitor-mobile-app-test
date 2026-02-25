@@ -9,10 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@capacitor-community/barcode-scanner": "^4.0.1",
     "@capacitor-mlkit/barcode-scanning": "^8.0.1",
     "@capacitor/android": "^8.1.0",
     "@capacitor/core": "^8.1.0",
     "@capacitor/geolocation": "^8.1.0",
+    "@capacitor/ios": "^8.1.0",
+    "@capacitor/keyboard": "^8.0.1",
+    "@capacitor/toast": "^8.0.1",
     "axios": "^1.13.5",
     "next": "16.1.6",
     "react": "19.2.3",
@@ -23,6 +27,7 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "typescript": "^5.9.3"
   }
 }

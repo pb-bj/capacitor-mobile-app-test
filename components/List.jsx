@@ -3,14 +3,19 @@
 import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BarcodeScanner from './BarcodeScanner';
+import { Keyboard } from '@capacitor/keyboard';
+import { Capacitor } from '@capacitor/core';
+import BarcodeScannerCommunity from './community-barcode-scanner';
 
 export default function List() {
 	const [posts, setPosts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [openCamera, setOpenCamera] = useState(false);
 	const [search, setSearch] = useState('');
+	const [keyboardHeight, setKeyboardHeight] = useState(0);
+	const searchInputRef = useRef(null);
 
 	useEffect(() => {
 		const fetchPosts = async () => {
@@ -27,6 +32,28 @@ export default function List() {
 		fetchPosts();
 	}, []);
 
+	useEffect(() => {
+		if (!Capacitor.isNativePlatform()) return;
+
+		const showListener = Keyboard.addListener('keyboardWillShow', (info) => {
+			setKeyboardHeight(info.keyboardHeight);
+		});
+		const hideListener = Keyboard.addListener('keyboardWillHide', () => {
+			setKeyboardHeight(0);
+		});
+
+		return () => {
+			showListener.then((l) => l.remove());
+			hideListener.then((l) => l.remove());
+		};
+	}, []);
+
+	const dismissKeyboard = () => {
+		if (Capacitor.isNativePlatform()) {
+			Keyboard.hide();
+		}
+	};
+
 	const filteredPosts = posts.filter(
 		(post) =>
 			post.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -42,7 +69,14 @@ export default function List() {
 	}
 
 	return (
-		<div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 16px' }}>
+		<div
+			onTouchStart={(e) => {
+				if (searchInputRef.current && !searchInputRef.current.contains(e.target)) {
+					dismissKeyboard();
+				}
+			}}
+			style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 16px', paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 32}px` : '32px' }}
+		>
 			<style>{`
 				.product-grid {
 					display: grid;
@@ -136,10 +170,12 @@ export default function List() {
 					</svg>
 
 					<input
-						type="text"
-						placeholder="Search products or categories..."
-						value={search}
-						onChange={(e) => setSearch(e.target.value)}
+					ref={searchInputRef}
+					type="text"
+					placeholder="Search products or categories..."
+					value={search}
+					onChange={(e) => setSearch(e.target.value)}
+					onKeyDown={(e) => e.key === 'Enter' && dismissKeyboard()}
 						className="search-input"
 						style={{
 							width: '100%',
@@ -226,13 +262,17 @@ export default function List() {
 			)}
 
 			{openCamera && (
-				<BarcodeScanner
-					onClose={() => setOpenCamera(false)}
-					onResult={(value) => {
-						setSearch(value); // auto search with scanned value
-						setOpenCamera(false);
-					}}
-				/>
+				<BarcodeScannerCommunity onClose={() => setOpenCamera(false)} onResult={(value) => {
+					setSearch(value);
+					setOpenCamera(false);
+				} }/>
+				// <BarcodeScanner
+				// 	onClose={() => setOpenCamera(false)}
+				// 	onResult={(value) => {
+				// 		setSearch(value); // auto search with scanned value
+				// 		setOpenCamera(false);
+				// 	}}
+				// />
 			)}
 
 			<div className="product-grid">
